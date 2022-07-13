@@ -6,6 +6,23 @@ defmodule CommunoteWeb.NoteLive.FormComponent do
   alias Communote.Years
 
   @impl true
+  def mount(socket) do
+    {:ok,
+      socket
+      |> assign(:uploaded_files, [])
+      |> allow_upload(:note_file, accept: ~w(.pdf), max_entries: 1, external: &presign_upload/2)}
+  end
+
+  defp presign_upload(_entry, socket) do
+    bucket = Application.fetch_env!(:communote, :bucket_name)
+    key = "zizi.pdf"
+
+    {:ok, presigned_url} = ExAws.Config.new(:s3) |> ExAws.S3.presigned_url(:put, bucket, key)
+    meta = %{uploader: "S3", bucket: bucket, key: key, url: presigned_url}
+    {:ok, meta, socket}
+  end
+
+  @impl true
   def update(%{note: note} = assigns, socket) do
     changeset = Notes.change_note(note)
     years = Years.list_years() |> Years.enumerate()
@@ -67,6 +84,14 @@ defmodule CommunoteWeb.NoteLive.FormComponent do
   end
 
   defp save_note(socket, :new, note_params) do
+    consume_uploaded_entries(socket, :note_file, fn %{} = meta, _entry ->
+      {:ok, presigned_url} =
+        ExAws.Config.new(:s3)
+        |> ExAws.S3.presigned_url(:get, meta.bucket, meta.key, expires_in: 86_400)
+
+      presigned_url
+    end)
+
     case Notes.create_note(note_params) do
       {:ok, note} ->
         {:noreply,
@@ -78,4 +103,9 @@ defmodule CommunoteWeb.NoteLive.FormComponent do
         {:noreply, assign(socket, changeset: changeset)}
     end
   end
+
+  def error_to_string(:too_large), do: "Too large"
+  def error_to_string(:not_accepted), do: "You have selected an unacceptable file type"
+  def error_to_string(:too_many_files), do: "You have selected too many files"
+  def error_to_string(:external_client_failure), do: "External client failure"
 end

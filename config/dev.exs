@@ -1,5 +1,9 @@
 import Config
 
+config :communote,
+  public_files_base_url: "http://localhost:9000",
+  bucket_name: "communote"
+
 config :communote, Communote.Repo,
   username: "postgres",
   password: "postgres",
@@ -72,3 +76,10 @@ config :phoenix, :stacktrace_depth, 20
 
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
+
+config :ex_aws, :s3,
+  scheme: "http://",
+  host: "minio",
+  port: 9000,
+  access_key_id: "admin",
+  secret_access_key: "password"

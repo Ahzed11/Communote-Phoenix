@@ -14,11 +14,14 @@ defmodule CommunoteWeb.NoteLive.Show do
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
      |> assign(:note, Notes.get_note_by_slug(slug))
+     |> assign(:file_url, Notes.get_public_file_url_from_s3(slug))
     }
   end
 
   @impl true
   def handle_event("delete", %{"slug" => slug}, socket) do
+    {:ok, _} = Notes.delete_file_from_s3(slug)
+
     note = Notes.get_note_by_slug(slug)
     {:ok, _} = Notes.delete_note(note)
 

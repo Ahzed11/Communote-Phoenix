@@ -1,22 +1,28 @@
-// We import the CSS which is extracted to its own file by esbuild.
-// Remove this line if you add a your own CSS build pipeline (e.g postcss).
+let Uploaders = {}
+
+// https://gist.github.com/goofansu/e3f8551a596373ef6370208bfc7db78d
+Uploaders.S3 = function (entries, onViewError) {
+    entries.forEach(entry => {
+        let xhr = new XMLHttpRequest()
+        onViewError(() => xhr.abort())
+        xhr.onload = () => (xhr.status === 200 ? entry.done() : entry.error())
+        xhr.onerror = () => entry.error()
+        xhr.upload.addEventListener("progress", event => {
+            if (event.lengthComputable) {
+            let percent = Math.round((event.loaded / event.total) * 100)
+            entry.progress(percent)
+            }
+        })
+  
+        xhr.open("PUT", entry.meta.url, true)
+        xhr.send(entry.file)
+    })
+}
+  
 
 // If you want to use Phoenix channels, run `mix help phx.gen.channel`
 // to get started and then uncomment the line below.
 // import "./user_socket.js"
-
-// You can include dependencies in two ways.
-//
-// The simplest option is to put them in assets/vendor and
-// import them using relative paths:
-//
-//     import "../vendor/some-package.js"
-//
-// Alternatively, you can `npm install some-package --prefix assets` and import
-// them using a path starting with the package name:
-//
-//     import "some-package"
-//
 
 // Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
 import "phoenix_html"
@@ -26,7 +32,10 @@ import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}})
+let liveSocket = new LiveSocket("/live", Socket, {
+    uploaders: Uploaders,
+    params: {_csrf_token: csrfToken}
+})
 
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})

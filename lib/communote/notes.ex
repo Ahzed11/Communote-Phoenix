@@ -183,4 +183,21 @@ defmodule Communote.Notes do
   def change_note(%Note{} = note, attrs \\ %{}) do
     Note.changeset(note, attrs)
   end
+
+  def get_public_file_url_from_s3(slug) do
+    "#{get_public_file_base_url_with_bucket()}#{slug}.pdf"
+  end
+
+  defp get_public_file_base_url_with_bucket() do
+    base_url = Application.fetch_env!(:communote, :public_files_base_url)
+    bucket = Application.fetch_env!(:communote, :bucket_name)
+    "#{base_url}/#{bucket}/"
+  end
+
+  def delete_file_from_s3(slug) do
+    :communote
+    |> Application.fetch_env!(:bucket_name)
+    |> ExAws.S3.delete_object("#{slug}.pdf")
+    |> ExAws.request()
+  end
 end

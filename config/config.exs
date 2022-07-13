@@ -47,10 +47,6 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-# Import environment specific config. This must remain at the bottom
-# of this file so it overrides the configuration defined above.
-import_config "#{config_env()}.exs"
-
 # Tailwind
 config :tailwind, version: "3.1.4", default: [
   args: ~w(
@@ -69,3 +65,7 @@ config :kaffy,
   admin_title: "Communoté",
   admin_logo: "/images/logo-communote.png",
   admin_logo_mini: "/images/favicon-32.png"
+
+# Import environment specific config. This must remain at the bottom
+# of this file so it overrides the configuration defined above.
+import_config "#{config_env()}.exs"

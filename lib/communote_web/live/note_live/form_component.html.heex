@@ -30,6 +30,32 @@
         <%= error_tag f, :small_description %>
     </div>
 
+    <%= if @action == :new do %>
+      <label class="w-full flex flex-col items-center px-4 py-6 bg-white dark:bg-gray-800 rounded-lg tracking-wide border border-gray-500 dark:border-gray-600 cursor-pointer text-gray-700 dark:text-gray-300 hover:text-purple-800 dark:hover:text-green-600 mt-4">
+          <svg class="w-8 h-8 " fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+              <path d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z" />
+          </svg>
+          <%= if length(@uploads.note_file.entries) <= 0 do %>
+            <span class="mt-2 text-sm">Select a file</span>
+          <% else %>
+            <%= for entry <- @uploads.note_file.entries do %>
+              <span class="mt-2 text-sm"> <%= entry.client_name %></span>
+            <% end %>
+          <% end %>
+          <%= live_file_input @uploads.note_file, class: "hidden" %>
+      </label>
+
+      <%= for entry <- @uploads.note_file.entries do %>
+        <%= for err <- upload_errors(@uploads.note_file, entry) do %>
+          <p class="text-red-400/100"><%= error_to_string(err) %></p>
+        <% end %>
+      <% end %>
+
+      <%= for err <- upload_errors(@uploads.note_file) do %>
+        <p class="text-red-400/100"><%= error_to_string(err) %></p>
+      <% end %>
+    <% end %>
+
     <div class="md:grid md:grid-cols-4 md:gap-4 mt-4">
       <div class="md:col-span-1">
         <%= label f, :course_search, class: "block mb-2 text-sm font-medium text-gray-600 dark:text-gray-200" %>

@@ -53,7 +53,11 @@ defmodule Communote.MixProject do
       {:slugify, "~> 1.3"},
       {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
       {:timex, "~> 3.0"},
-      {:kaffy, "~> 0.9.0"}
+      {:kaffy, "~> 0.9.0"},
+      {:ex_aws, "~> 2.1"},
+      {:ex_aws_s3, "~> 2.0"},
+      {:hackney, "~> 1.9"},
+      {:sweet_xml, "~> 0.6"}
     ]
   end
 
